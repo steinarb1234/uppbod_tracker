@@ -1,0 +1,35 @@
+name: Run fetch_uppbod.py
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  fetch-uppbod:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Run fetch_uppbod.py
+      run: |
+        python fetch_uppbod.py | tee output.txt
+
+    - name: Upload output as artifact
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: fetch-output
+        path: output.txt
