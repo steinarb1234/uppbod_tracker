@@ -44,7 +44,7 @@ try:
                 # Parse the date string assuming it's in the format 'M/D/YYYY, 12:00:00 AM'
                 parsed_date = datetime.strptime(date_str, '%m/%d/%Y, %I:%M:%S %p')
                 # Reformat to 'YYYY-MM-DD HH:MM:SS'
-                return parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+                return parsed_date.strftime('%Y-%m-%d')
             except ValueError:
                 # If parsing fails, return the original string
                 return date_str
