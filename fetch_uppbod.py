@@ -72,8 +72,12 @@ try:
             # Identify auctions that are in df_existing but not in df_new
             missing_auctions = df_combined.index.difference(df_new.index)
             
-            # Mark 'auctionType' as 'cancelled' for missing auctions
-            df_combined.loc[missing_auctions, 'auctionType'] = 'cancelled'
+            # Exclude auctions with 'auctionType' == 'Sölu lokið' from being marked as 'cancelled'
+            auctions_to_cancel = df_combined.loc[missing_auctions]
+            auctions_to_cancel = auctions_to_cancel[auctions_to_cancel['auctionType'] != 'Sölu lokið'].index
+            
+            # Mark 'auctionType' as 'cancelled' for eligible missing auctions
+            df_combined.loc[auctions_to_cancel, 'auctionType'] = 'cancelled'
         else:
             # If no existing data, the combined data is the new data
             df_combined = df_new
