@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import os
 from datetime import datetime
+import re
 
 # Define the URL
 url = "https://island.is/api/graphql"
@@ -34,11 +35,18 @@ try:
         # Convert the list of auctions into a DataFrame
         df_new = pd.DataFrame(auctions)
         
+        # Filter out auctions where 'auctionType' is 'Lausafjáruppboð'
+        df_new = df_new[df_new['auctionType'] != 'Lausafjáruppboð']
+        
         # Create an 'id' column using 'lotId' if available, otherwise 'lotName'
         df_new['id'] = df_new.apply(lambda row: row['lotId'] if row['lotId'] else row['lotName'], axis=1)
         
-        # Ensure the 'id' is unique by combining with 'auctionDate' and 'auctionTime' if necessary
-        df_new['id'] = df_new.apply(lambda row: row['id'] + '_' + row['auctionDate'] + '_' + row['auctionTime'] if df_new['id'].duplicated().any() else row['id'], axis=1)
+        # Clean 'id' to remove any special characters that might cause issues
+        df_new['id'] = df_new['id'].apply(lambda x: re.sub(r'[\\/*?:"<>|]', '', x))
+        
+        # Ensure the 'id' is unique by combining with 'auctionDate' and 'auctionTime' if duplicates exist
+        if df_new['id'].duplicated().any():
+            df_new['id'] = df_new.apply(lambda row: f"{row['id']}_{row['auctionDate']}_{row['auctionTime']}", axis=1)
         
         # Set 'id' as the index
         df_new.set_index('id', inplace=True)
