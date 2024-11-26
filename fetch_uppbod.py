@@ -34,8 +34,14 @@ try:
         # Convert the list of auctions into a DataFrame
         df_new = pd.DataFrame(auctions)
         
-        # Set 'lotId' as the index
-        df_new.set_index('lotId', inplace=True)
+        # Create an 'id' column using 'lotId' if available, otherwise 'lotName'
+        df_new['id'] = df_new.apply(lambda row: row['lotId'] if row['lotId'] else row['lotName'], axis=1)
+        
+        # Ensure the 'id' is unique by combining with 'auctionDate' and 'auctionTime' if necessary
+        df_new['id'] = df_new.apply(lambda row: row['id'] + '_' + row['auctionDate'] + '_' + row['auctionTime'] if df_new['id'].duplicated().any() else row['id'], axis=1)
+        
+        # Set 'id' as the index
+        df_new.set_index('id', inplace=True)
         
         # Current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -43,13 +49,13 @@ try:
         # Rename the 'auctionType' column to the current timestamp
         df_new.rename(columns={'auctionType': timestamp}, inplace=True)
         
-        # Keep only the 'auctionType' column
+        # Keep only the timestamp column
         df_new = df_new[[timestamp]]
         
         # Check if the CSV file exists
         if os.path.exists('auction_data.csv'):
             # Load existing data
-            df_existing = pd.read_csv('auction_data.csv', index_col='lotId')
+            df_existing = pd.read_csv('auction_data.csv', index_col='id')
             
             # Merge the new data with the existing data
             df_combined = df_existing.join(df_new, how='outer')
