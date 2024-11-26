@@ -1,9 +1,14 @@
-name: Run fetch_uppbod.py
+name: Update Auction Data
 
 on:
-  push:
-    branches: [ main ]
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fetch_uppbod.py'
 
 jobs:
   fetch-uppbod:
@@ -12,6 +17,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        persist-credentials: false  # Important for security
+        fetch-depth: 0  # Fetch all history for git
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -21,15 +29,23 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests
+        pip install requests pandas
 
     - name: Run fetch_uppbod.py
-      run: |
-        python fetch_uppbod.py | tee output.txt
+      run: python fetch_uppbod.py
 
-    - name: Upload output as artifact
-      if: always()
-      uses: actions/upload-artifact@v3
+    - name: Configure git
+      run: |
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions Bot"
+
+    - name: Commit changes
+      run: |
+        git add auction_data.csv
+        git commit -m "Update auction data [skip ci]" || echo "No changes to commit"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@v0.6.0
       with:
-        name: fetch-output
-        path: output.txt
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
