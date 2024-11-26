@@ -68,6 +68,12 @@ try:
             # Update dynamic fields
             dynamic_fields = ['auctionType', 'auctionDate', 'auctionTime', 'publishText', 'auctionTakesPlaceAt', 'last_fetched']
             df_combined.update(df_new[dynamic_fields])
+            
+            # Identify auctions that are in df_existing but not in df_new
+            missing_auctions = df_combined.index.difference(df_new.index)
+            
+            # Mark 'auctionType' as 'cancelled' for missing auctions
+            df_combined.loc[missing_auctions, 'auctionType'] = 'cancelled'
         else:
             # If no existing data, the combined data is the new data
             df_combined = df_new
