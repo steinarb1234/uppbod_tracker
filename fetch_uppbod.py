@@ -54,19 +54,20 @@ try:
         # Current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # Rename the 'auctionType' column to the current timestamp
-        df_new.rename(columns={'auctionType': timestamp}, inplace=True)
-        
-        # Keep only the timestamp column
-        df_new = df_new[[timestamp]]
+        # Add a column for the current timestamp indicating the fetch time
+        df_new['last_fetched'] = timestamp
         
         # Check if the CSV file exists
         if os.path.exists('auction_data.csv'):
             # Load existing data
             df_existing = pd.read_csv('auction_data.csv', index_col='id')
             
-            # Merge the new data with the existing data
-            df_combined = df_existing.join(df_new, how='outer')
+            # Update existing data with new data
+            df_combined = df_existing.combine_first(df_new)
+            
+            # Update dynamic fields
+            dynamic_fields = ['auctionType', 'auctionDate', 'auctionTime', 'publishText', 'auctionTakesPlaceAt', 'last_fetched']
+            df_combined.update(df_new[dynamic_fields])
         else:
             # If no existing data, the combined data is the new data
             df_combined = df_new
