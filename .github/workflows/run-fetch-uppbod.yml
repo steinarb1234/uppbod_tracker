@@ -12,14 +12,17 @@ on:
 
 jobs:
   fetch-uppbod:
+    if: github.event_name != 'push' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-        persist-credentials: false  # Important for security
-        fetch-depth: 0  # Fetch all history for git
+        persist-credentials: true  # Ensure credentials are available
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -45,7 +48,5 @@ jobs:
         git commit -m "Update auction data [skip ci]" || echo "No changes to commit"
 
     - name: Push changes
-      uses: ad-m/github-push-action@v0.6.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: main
+      run: |
+        git push origin HEAD:${{ github.ref }}
