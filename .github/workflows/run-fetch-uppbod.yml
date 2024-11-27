@@ -2,7 +2,7 @@ name: Update Auction Data
 
 on:
   schedule:
-    - cron: '0/5 * * * *'  # Runs every hour
+    - cron: '0/5 * * * *'  # Runs every 5 minutes
   workflow_dispatch:
   push:
     branches:
@@ -37,6 +37,16 @@ jobs:
     - name: Run fetch_uppbod.py
       run: python fetch_uppbod.py
 
+    - name: Debug file creation
+      run: ls -al
+
+    - name: Ensure auction_data.csv exists
+      run: |
+        if [ ! -f "auction_data.csv" ]; then
+          echo "Creating empty auction_data.csv."
+          echo "id,auctionType,auctionDate,auctionTime,publishText,auctionTakesPlaceAt,last_fetched" > auction_data.csv
+        fi
+
     - name: Configure git
       run: |
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -44,7 +54,7 @@ jobs:
 
     - name: Commit changes
       run: |
-        git add auction_data.csv
+        git add auction_data.csv || echo "No file to add"
         git commit -m "Update auction data [skip ci]" || echo "No changes to commit"
 
     - name: Push changes
