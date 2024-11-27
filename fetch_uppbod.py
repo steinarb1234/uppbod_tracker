@@ -37,6 +37,7 @@ try:
         
         # Filter out auctions where 'auctionType' is 'Lausafjáruppboð'
         df = df[df['auctionType'] != 'Lausafjáruppboð']
+        df = df[df['LotType'] != 'Ökutæki']
         
         # Parse and reformat 'auctionDate' to match 'last_fetched' format
         def format_auction_date(date_str):
@@ -95,6 +96,8 @@ try:
         else:
             # If no existing data, the combined data is the new data
             df_combined = df
+
+        df.sort_values(by=['auctionDate'], inplace=True)
         
         # Save the combined data back to CSV
         df_combined.to_csv('auction_data.csv')
