@@ -80,6 +80,18 @@ try:
         # Sort by 'auctionDate'
         df_combined.sort_values(by='auctionDate', inplace=True)
 
+        # Define the first few columns to order
+        first_columns = ['id', 'auctionType', 'lotName', 'auctionDate', 'auctionTime', 'petitioners', 'last_fecthed']
+
+        # Dynamically find the remaining columns
+        remaining_columns = [col for col in df_combined.columns if col not in first_columns]
+
+        # Combine to enforce the partial order
+        column_order = first_columns + remaining_columns
+
+        # Apply the column order to the DataFrame
+        df_combined = df_combined[column_order]        
+
         # Save the updated data
         df_combined.to_csv('auction_data.csv')
         print("Data saved to auction_data.csv")
