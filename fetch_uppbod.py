@@ -81,10 +81,10 @@ try:
             df_combined = df
 
         # Sort by 'auctionDate'
-        df_combined.sort_values(by='auctionDate', inplace=True)
+        df_combined.sort_values(by='auctionDate', inplace=True, ascending=False)
 
         # Define the first few columns to order
-        first_columns = ['auctionDate', 'auctionTime', 'lotId', 'lotName']
+        first_columns = ['auctionType', 'lotName', 'auctionDate', 'auctionTime', 'petitioners', 'last_fetched']
 
         # Dynamically find the remaining columns
         remaining_columns = [col for col in df_combined.columns if col not in first_columns]
