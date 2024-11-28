@@ -40,7 +40,7 @@ try:
 
         # Filter out specific auction types
         df = df[df['auctionType'] != 'Lausafjáruppboð']
-        df = df[df['LotType'] != 'Ökutæki']
+        df = df[df['lotType'] != 'Ökutæki']
 
         # Format 'auctionDate'
         def format_auction_date(date_str):
