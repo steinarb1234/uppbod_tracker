@@ -76,7 +76,12 @@ try:
             for col in missing_columns:
                 df_existing[col] = None
 
-            df_combined = pd.concat([df_existing, df]).drop_duplicates(keep='last')
+            # Combine the data
+            df_combined = pd.concat([df_existing, df])
+
+            # Remove duplicates based on relevant columns (excluding 'last_fetched')
+            subset_columns = [col for col in df_combined.columns if col != 'last_fetched']
+            df_combined = df_combined.drop_duplicates(subset=subset_columns, keep='last')
         else:
             df_combined = df
 
