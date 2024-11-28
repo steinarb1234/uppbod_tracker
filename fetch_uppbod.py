@@ -71,17 +71,20 @@ try:
         if os.path.exists('auction_data.csv'):
             df_existing = pd.read_csv('auction_data.csv', index_col='id')
 
-            # Combine and update fields
+            # Align columns in case of changes
+            missing_columns = set(df.columns) - set(df_existing.columns)
+            for col in missing_columns:
+                df_existing[col] = None
+
             df_combined = pd.concat([df_existing, df]).drop_duplicates(keep='last')
-            df_combined.update(df)
         else:
             df_combined = df
 
         # Sort by 'auctionDate'
-        df_combined.sort_values(by='auctionDate', inplace=True, ascending=False)
+        df_combined.sort_values(by='auctionDate', inplace=True)
 
         # Define the first few columns to order
-        first_columns = ['auctionType', 'lotName', 'auctionDate', 'auctionTime', 'petitioners', 'last_fetched']
+        first_columns = ['auctionDate', 'auctionTime', 'lotId', 'lotName']
 
         # Dynamically find the remaining columns
         remaining_columns = [col for col in df_combined.columns if col not in first_columns]
@@ -90,11 +93,11 @@ try:
         column_order = first_columns + remaining_columns
 
         # Apply the column order to the DataFrame
-        df_combined = df_combined[column_order]        
+        df_combined = df_combined[column_order]
 
         # Save the updated data
         df_combined.to_csv('auction_data.csv')
-        print("Data saved to auction_data.csv")
+        print("Data saved to auction_data.csv with partially ordered columns.")
     else:
         print("Request failed.")
         print(f"Status Code: {response.status_code}\nResponse Text: {response.text}")
